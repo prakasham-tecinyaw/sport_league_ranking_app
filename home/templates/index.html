@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CRUD Table Example</title>
+  <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
+</head>
+<body>
+  <h1>CRUD Table Example</h1>
+
+  <table id="myTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody hx-get="/api/users">
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+          <button hx-delete="/api/users/{{ user.id }}">Delete</button>
+          <button hx-get="/api/users/{{ user.id }}" hx-swap="outerHTML" hx-target="#editForm">Edit</button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">No users found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form id="addForm" hx-post="/api/users" hx-target="#myTable tbody">
+    <h2>Add User</h2>
+    <div>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div>
+      <button type="submit">Add</button>
+    </div>
+  </form>
+
+  <form id="editForm" hx-patch="" hx-target="#myTable tbody">
+    {% csrf_token %}
+    <h2>Edit User</h2>
+    <div>
+      <label for="editName">Name:</label>
+      <input type="text" id="editName" name="name" required>
+    </div>
+    <div>
+      <label for="editEmail">Email:</label>
+      <input type="email" id="editEmail" name="email" required>
+    </div>
+    <div>
+      <button type="submit">Update</button>
+    </div>
+  </form>
+
+  <script>
+    // Listen for htmx:afterRequest event to refresh the form and table after each request
+    document.addEventListener('htmx:afterRequest', function (event) {
+      document.getElementById('addForm').reset(); // Reset the form after adding a user
+    });
+  </script>
+</body>
+</html>
